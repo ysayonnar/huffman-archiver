@@ -1,17 +1,17 @@
 package archiver
 
-func countFrequency(text string) map[byte]int {
+func countFrequency(data []byte) map[byte]int {
 	frequency := make(map[byte]int)
 
-	for i := 0; i < len(text); i++ {
-		frequency[text[i]]++
+	for _, s := range data {
+		frequency[s]++
 	}
 
 	return frequency
 }
 
-func Huffman(text string) error {
-	frequency := countFrequency(text)
+func Huffman(data []byte) error {
+	frequency := countFrequency(data)
 
 	_ = frequency
 	return nil
