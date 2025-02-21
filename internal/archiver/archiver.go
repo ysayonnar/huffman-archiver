@@ -1,5 +1,9 @@
 package archiver
 
+import (
+	"archiver/internal/structures"
+)
+
 func countFrequency(data []byte) map[byte]int {
 	frequency := make(map[byte]int)
 
@@ -12,7 +16,12 @@ func countFrequency(data []byte) map[byte]int {
 
 func Huffman(data []byte) error {
 	frequency := countFrequency(data)
+	pq := structures.NewPriorityQueue()
 
-	_ = frequency
+	for symbol, freq := range frequency {
+		node := &structures.Node{Frequency: freq, Symbol: symbol}
+		pq.Enqueue(node)
+	}
+
 	return nil
 }

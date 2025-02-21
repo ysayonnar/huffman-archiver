@@ -5,7 +5,8 @@ type Tree struct {
 }
 
 type Node struct {
-	Value byte
-	Left  *Node
-	Right *Node
+	Symbol    byte
+	Frequency int
+	Left      *Node
+	Right     *Node
 }
