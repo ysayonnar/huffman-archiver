@@ -2,10 +2,11 @@ package archiver
 
 import (
 	"archiver/internal/structures"
+	"fmt"
 	"io"
 )
 
-func MakeCodes(pq *structures.PriorityQueue) map[byte]string {
+func makeCodes(pq *structures.PriorityQueue) map[byte]string {
 	for pq.Len() > 1 {
 		firstNode := pq.Dequeue()
 		secondNode := pq.Dequeue()
@@ -51,7 +52,43 @@ func countFrequency(data []byte) map[byte]int {
 	return frequency
 }
 
-func Huffman(data []byte, destination io.Writer) {
+func encode(data []byte, destination io.Writer, codesMap map[byte]string) error {
+	var currentByte byte
+	var bitCount uint8
+
+	for _, char := range data {
+		code := codesMap[char]
+
+		for _, bit := range code {
+			currentByte <<= 1
+			if bit == '1' {
+				currentByte |= 1
+			}
+			bitCount++
+
+			if bitCount == 8 {
+				_, err := destination.Write([]byte{currentByte})
+				if err != nil {
+					return fmt.Errorf("error while writing data")
+				}
+				currentByte = 0
+				bitCount = 0
+			}
+		}
+	}
+
+	if bitCount > 0 {
+		currentByte <<= (8 - bitCount)
+		_, err := destination.Write([]byte{currentByte})
+		if err != nil {
+			return fmt.Errorf("error while writing data")
+		}
+	}
+
+	return nil
+}
+
+func Huffman(data []byte, destination io.Writer) error {
 	frequency := countFrequency(data)
 	pq := structures.NewPriorityQueue()
 
@@ -60,7 +97,12 @@ func Huffman(data []byte, destination io.Writer) {
 		pq.Enqueue(node)
 	}
 
-	codesMap := MakeCodes(pq)
+	codesMap := makeCodes(pq)
 
-	//TODO: дописать кодирование
+	err := encode(data, destination, codesMap)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
