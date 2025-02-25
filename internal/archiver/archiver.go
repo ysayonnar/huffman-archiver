@@ -88,7 +88,12 @@ func encode(data []byte, destination io.Writer, codesMap map[byte]string) error 
 	return nil
 }
 
-func Huffman(data []byte, destination io.Writer) error {
+func Huffman(dataSource io.Reader, destination io.Writer) error {
+	data, err := io.ReadAll(dataSource)
+	if err != nil {
+		return fmt.Errorf("error while reading dataSource: %w", err)
+	}
+
 	frequency := countFrequency(data)
 	pq := structures.NewPriorityQueue()
 
@@ -99,10 +104,7 @@ func Huffman(data []byte, destination io.Writer) error {
 
 	codesMap := makeCodes(pq)
 
-	err := encode(data, destination, codesMap)
-	if err != nil {
-		return err
-	}
+	err = encode(data, destination, codesMap)
 
-	return nil
+	return err
 }

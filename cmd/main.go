@@ -1,9 +1,41 @@
 package main
 
-import "archiver/internal/archiver"
-
-var text = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sint ex adipisci exercitationem eaque voluptatem alias, fugiat ad quaerat earum recusandae, fuga tempora maiores aut corrupti. Et, eaque quod provident facere doloribus dicta reprehenderit aperiam mollitia quisquam fugiat molestiae consequuntur reiciendis repellendus voluptas, impedit explicabo ratione! Impedit iure illo vitae est distinctio ratione, commodi itaque, voluptatem iste eligendi esse ex, sed blanditiis quia voluptatibus autem fugiat nihil voluptate optio error eum quod harum corrupti. Quibusdam corporis consequatur provident tenetur, sequi cupiditate sed aliquid, quod blanditiis quidem molestiae! Nemo eius suscipit quos? Nostrum voluptatum accusantium ducimus magni ab autem. Tempore harum quidem animi consectetur! Est nobis sequi iure facere, ipsum natus cum nostrum rem voluptatum tempora, veniam, sapiente sint reprehenderit. Deleniti, ratione doloribus, amet ducimus harum molestias omnis sunt ut ea tempore illo hic aut facere, aperiam suscipit vel placeat quas exercitationem temporibus! Non accusantium impedit hic perferendis odit quis molestias aspernatur veritatis. Minima, ullam, sunt temporibus culpa consequuntur amet ea blanditiis consectetur vitae eaque officiis quis voluptates eveniet aperiam impedit voluptas debitis ipsa nostrum vel deleniti deserunt rerum. Temporibus similique expedita, vel, eaque ut quae illo animi officiis ea corrupti laudantium quia eos consequuntur necessitatibus delectus. Natus, atque. Obcaecati, ea laudantium!" // пока для тестирования будет текст, потом файлы
+import (
+	"archiver/internal/archiver"
+	"flag"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+)
 
 func main() {
-	archiver.Huffman([]byte(text))
+	fileName := flag.String("f", "", "file with extension")
+	help := flag.Bool("h", false, "help")
+	flag.Parse()
+
+	if *help || *fileName == "" {
+		fmt.Println("use -f <file> to choose file")
+		return
+	}
+
+	file, err := os.Open(*fileName)
+	if err != nil {
+		fmt.Println("error while opening file: ", err.Error())
+		return
+	}
+	defer file.Close()
+
+	fName := strings.ReplaceAll(filepath.Base(file.Name()), filepath.Base(filepath.Ext(file.Name())), ".hf")
+	newFile, err := os.Create(fName)
+	if err != nil {
+		fmt.Printf("error while creating %s: %s\n", fName, err.Error())
+	}
+	defer newFile.Close()
+
+	err = archiver.Huffman(file, newFile)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 }
